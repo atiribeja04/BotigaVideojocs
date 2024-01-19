@@ -9,17 +9,17 @@ package projecte2.botiga;
  * @author batoi
  */
 import java.util.Scanner;
+import java.util.Arrays;
 
 public class Main {
 
-    public static String[][] catalogo = crearCatalogo();
-
     public static void main(String[] args) {
-        bienvenida();
+        String[][] catalogo = crearCatalogo();
+        bienvenida(catalogo);
 
     }
 
-    public static void bienvenida() {
+    public static void bienvenida(String catalogo[][]) {
         // Lógica simple para el ménu inicial
         Scanner teclado = new Scanner(System.in);
         int opcion;
@@ -36,14 +36,22 @@ public class Main {
         // Switch para manejar la entrada del usuario
         switch (opcion) {
             case 1:
-                verCatalogo();
+                verCatalogo(catalogo);
                 break;
             case 2:
-                verStock();
+                verStock(catalogo);
                 break;
             case 3:
-                verStockOrdenado();
+                verStockOrdenado(catalogo);
                 break;
+            case 4:
+                verCatalogoOrdenado(catalogo);
+                break;
+            case 5:
+                registrarVenta(catalogo);
+                break;
+            case 7:
+                return;
         }
     }
 
@@ -63,11 +71,9 @@ public class Main {
         return catalogo;
     }
 
-    public static void verCatalogo() {
+    public static void verCatalogo(String[][] catalogo) {
         // Encabezado
-        System.out.println("+--------+--------------------+-------+");
-        System.out.printf("| %-7s| %-20s| %-6s|\n", "Código", "Nombre", "Precio");
-        System.out.println("+--------+--------------------+-------+");
+        imprimirEncabezadoPrecio();
 
         // Vamos volcando los datos
         for (int i = 0; i < catalogo.length; i++) {
@@ -79,14 +85,12 @@ public class Main {
         }
 
         // Pie de tabla
-        System.out.println("+--------+--------------------+-------+");
+        pieDeTabla();
     }
 
-    public static void verStock() {
+    public static void verStock(String[][] catalogo) {
         // Encabezado
-        System.out.println("+--------+--------------------+-------+");
-        System.out.printf("| %-7s| %-20s| %-6s|\n", "Código", "Nombre", "Stock");
-        System.out.println("+--------+--------------------+-------+");
+        imprimirEncabezadoStock();
 
         // Vamos volcando los datos
         for (int i = 0; i < catalogo.length; i++) {
@@ -98,41 +102,152 @@ public class Main {
         }
 
         // Pie de tabla
-        System.out.println("+--------+--------------------+-------+");
+        pieDeTabla();
     }
 
-    public static void verCatalogoOrdenado() {
-        // Encabezado
-        System.out.println("+--------+--------------------+-------+");
-        System.out.printf("| %-7s| %-20s| %-6s|\n", "Código", "Nombre", "Stock");
-        System.out.println("+--------+--------------------+-------+");
-        for (int i = 0; i < catalogo.length; i++) {
-            int aux = 0;
-            String codigo = catalogo[i][0];
-            String nombre = catalogo[i][1];
-            String precio = catalogo[i][2];
+    public static void verCatalogoOrdenado(String[][] catalogo) {
+        // Copia del cátalogo
+        String[][] catalogoOrdenado = Arrays.copyOf(catalogo, catalogo.length);
 
-        }
-    }
+        // Algoritmo
+        for (int i = 0; i < catalogoOrdenado.length - 1; i++) {
+            for (int j = 0; j < catalogoOrdenado.length - 1 - i; j++) {
+                double precioActual = Double.parseDouble(catalogoOrdenado[j][2]);
+                double precioSiguiente = Double.parseDouble(catalogoOrdenado[j + 1][2]);
 
-    public static void verStockOrdenado() {
-        // Encabezado
-        System.out.println("+--------+--------------------+-------+");
-        System.out.printf("| %-7s| %-20s| %-6s|\n", "Código", "Nombre", "Stock");
-        System.out.println("+--------+--------------------+-------+");
-        for (int i = 0; i < catalogo.length; i++) {
-            int aux = 0;
-            String codigo = catalogo[i][0];
-            String nombre = catalogo[i][1];
-            int stock = Integer.parseInt(catalogo[i][3]);
-
-            if (stock > aux) {
-                aux = stock;
-                System.out.println(aux);
-                System.out.printf("| %-7s| %-20s| %-6s|\n", codigo, nombre, stock);
-            } else {
-                
+                if (precioActual < precioSiguiente) {
+                    // Mover las filas ordenadas
+                    String[] temp = catalogoOrdenado[j];
+                    catalogoOrdenado[j] = catalogoOrdenado[j + 1];
+                    catalogoOrdenado[j + 1] = temp;
+                }
             }
         }
+
+        // Encabezado
+        imprimirEncabezadoPrecio();
+
+        // Vamos volcando los datos ordenados, con la array copiada
+        for (int i = 0; i < catalogoOrdenado.length; i++) {
+            String codigo = catalogoOrdenado[i][0];
+            String nombre = catalogoOrdenado[i][1];
+            String precio = catalogoOrdenado[i][2];
+
+            System.out.printf("| %-7s| %-20s| %-6s|\n", codigo, nombre, precio);
+        }
+
+        // Pie de tabla
+        pieDeTabla();
+    }
+
+    public static void verStockOrdenado(String[][] catalogo) {
+        // Copia del cátalogo
+        String[][] catalogoOrdenado = Arrays.copyOf(catalogo, catalogo.length);
+
+        // Algoritmo 
+        for (int i = 0; i < catalogoOrdenado.length - 1; i++) {
+            for (int j = 0; j < catalogoOrdenado.length - 1 - i; j++) {
+                int stockActual = Integer.parseInt(catalogoOrdenado[j][3]);
+                int stockSiguiente = Integer.parseInt(catalogoOrdenado[j + 1][3]);
+
+                if (stockActual > stockSiguiente) {
+                    // Mover las filas ordenadas
+                    String[] temp = catalogoOrdenado[j];
+                    catalogoOrdenado[j] = catalogoOrdenado[j + 1];
+                    catalogoOrdenado[j + 1] = temp;
+                }
+            }
+        }
+
+        // Encabezado
+        imprimirEncabezadoStock();
+
+        // Vamos volcando los datos ordenados, con la array copiada
+        for (int i = 0; i < catalogoOrdenado.length; i++) {
+            String codigo = catalogoOrdenado[i][0];
+            String nombre = catalogoOrdenado[i][1];
+            String stock = catalogoOrdenado[i][3];
+
+            System.out.printf("| %-7s| %-20s| %-6s|\n", codigo, nombre, stock);
+        }
+
+        // Pie de tabla
+        pieDeTabla();
+    }
+
+    public static void registrarVenta(String[][] catalogo) {
+        Scanner teclado = new Scanner(System.in);
+        String[][] totalPedido = new String[1][3];
+
+        char eleccionUsuario = ' ';
+        int ventaActual = -1;
+        do {
+            ventaActual += 1;
+            System.out.print("Introduzca el código del videojuego que desea comprar:");
+            int codigoJuego = teclado.nextInt();
+            if (codigoJuego <= 0 || codigoJuego > catalogo.length) {
+                System.out.println("Error: Código de juego no válido.");
+                continue;
+            }
+            int stockActual = Integer.parseInt(catalogo[codigoJuego - 1][3]);
+            if (stockActual <= 0) {
+                System.out.println("Lo siento, no tenemos este videojuego disponible.");
+                continue;
+            }
+            System.out.print("Introduzca la cantidad de unidades que desea comprar:");
+            int cantidadVideojuego = teclado.nextInt();
+            if (cantidadVideojuego > stockActual) {
+                System.out.printf("Lo siento, no disponemos de tanto stock. Solo tenemos %d unidades para %s.\n", stockActual, catalogo[codigoJuego - 1][1]);
+                continue;
+            }
+
+            if (stockActual >= cantidadVideojuego && codigoJuego >= 1 && codigoJuego <= catalogo.length) {
+                int stockNuevo = stockActual - cantidadVideojuego;
+                catalogo[codigoJuego - 1][3] = Integer.toString(stockNuevo);
+            }
+
+            totalPedido[ventaActual][0] = Integer.toString(codigoJuego);
+            totalPedido[ventaActual][1] = catalogo[codigoJuego - 1][1];
+            totalPedido[ventaActual][2] = Integer.toString(cantidadVideojuego);
+
+            System.out.print("¿Desea comprar algún videojuego más? (S/N):");
+            eleccionUsuario = teclado.next().charAt(0);
+            if (eleccionUsuario == 'S') {
+                continue;
+            }
+        } while (eleccionUsuario != 'N');
+        imprimirEncabezadoVenta();
+
+        for (int i = 0; i < totalPedido.length; i++) {
+            String codigo = totalPedido[i][0];
+            String nombre = totalPedido[i][1];
+            String unidades = totalPedido[i][2];
+
+            System.out.printf("| %-7s| %-20s| %-6s|\n", codigo, nombre, unidades);
+        }
+        pieDeTabla();
+
+    }
+
+    public static void imprimirEncabezadoStock() {
+        System.out.println("+--------+--------------------+-------+");
+        System.out.printf("| %-7s| %-20s| %-6s|\n", "Código", "Nombre", "Stock");
+        System.out.println("+--------+--------------------+-------+");
+    }
+
+    public static void imprimirEncabezadoPrecio() {
+        System.out.println("+--------+--------------------+-------+");
+        System.out.printf("| %-7s| %-20s| %-6s|\n", "Código", "Nombre", "Precio");
+        System.out.println("+--------+--------------------+-------+");
+    }
+
+    public static void imprimirEncabezadoVenta() {
+        System.out.println("+--------+--------------------+-------+");
+        System.out.printf("| %-7s| %-20s| %-6s|\n", "Código", "Nombre", "Unidades");
+        System.out.println("+--------+--------------------+-------+");
+    }
+
+    public static void pieDeTabla() {
+        System.out.println("+--------+--------------------+-------+");
     }
 }
