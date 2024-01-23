@@ -50,6 +50,9 @@ public class Main {
             case 5:
                 registrarVenta(catalogo);
                 break;
+            case 6:
+                //registrarDevolucion(catalogo); (No implementado).
+                break;
             case 7:
                 return;
         }
@@ -175,14 +178,14 @@ public class Main {
         pieDeTabla();
     }
 
-    public static void registrarVenta(String[][] catalogo) {
+    public static String[][] registrarVenta(String[][] catalogo) {
         Scanner teclado = new Scanner(System.in);
-        String[][] totalPedido = new String[1][3];
+        String[][] totalPedido = new String[0][3];
 
         char eleccionUsuario = ' ';
-        int ventaActual = -1;
+        int ventaActual = 0;
+
         do {
-            ventaActual += 1;
             System.out.print("Introduzca el código del videojuego que desea comprar:");
             int codigoJuego = teclado.nextInt();
             if (codigoJuego <= 0 || codigoJuego > catalogo.length) {
@@ -191,7 +194,7 @@ public class Main {
             }
             int stockActual = Integer.parseInt(catalogo[codigoJuego - 1][3]);
             if (stockActual <= 0) {
-                System.out.println("Lo siento, no tenemos este videojuego disponible.");
+                System.out.println("Lo siento, no disponemos de ese videojuego.");
                 continue;
             }
             System.out.print("Introduzca la cantidad de unidades que desea comprar:");
@@ -201,33 +204,45 @@ public class Main {
                 continue;
             }
 
-            if (stockActual >= cantidadVideojuego && codigoJuego >= 1 && codigoJuego <= catalogo.length) {
-                int stockNuevo = stockActual - cantidadVideojuego;
-                catalogo[codigoJuego - 1][3] = Integer.toString(stockNuevo);
-            }
+            // Redimensionamos el array para la nueva venta
+            totalPedido = Arrays.copyOf(totalPedido, totalPedido.length + 1);
+            totalPedido[ventaActual] = new String[]{Integer.toString(codigoJuego), catalogo[codigoJuego - 1][1], Integer.toString(cantidadVideojuego)};
 
-            totalPedido[ventaActual][0] = Integer.toString(codigoJuego);
-            totalPedido[ventaActual][1] = catalogo[codigoJuego - 1][1];
-            totalPedido[ventaActual][2] = Integer.toString(cantidadVideojuego);
+            ventaActual++;
 
             System.out.print("¿Desea comprar algún videojuego más? (S/N):");
             eleccionUsuario = teclado.next().charAt(0);
-            if (eleccionUsuario == 'S') {
-                continue;
-            }
         } while (eleccionUsuario != 'N');
-        imprimirEncabezadoVenta();
 
+        // Calcular el total a pagar
+        double totalPagar = 0;
+        for (int i = 0; i < totalPedido.length; i++) {
+            String codigo = totalPedido[i][0];
+            String unidades = totalPedido[i][2];
+            double precio = Double.parseDouble(catalogo[Integer.parseInt(codigo) - 1][2]);
+            totalPagar += Double.parseDouble(unidades) * precio;
+        }
+        
+        // Volcamos los datos
+        imprimirEncabezadoVenta();
         for (int i = 0; i < totalPedido.length; i++) {
             String codigo = totalPedido[i][0];
             String nombre = totalPedido[i][1];
             String unidades = totalPedido[i][2];
 
-            System.out.printf("| %-7s| %-20s| %-6s|\n", codigo, nombre, unidades);
+            System.out.printf("| %-7s| %-20s| %-8s|\n", codigo, nombre, unidades);
         }
         pieDeTabla();
+        System.out.printf("Total a pagar: %.2f €\n", totalPagar);
+        System.out.println("Gracias por su compra.");
 
+
+        bienvenida(catalogo);
+        return totalPedido;
+        
     }
+    
+    
 
     public static void imprimirEncabezadoStock() {
         System.out.println("+--------+--------------------+-------+");
@@ -242,12 +257,15 @@ public class Main {
     }
 
     public static void imprimirEncabezadoVenta() {
-        System.out.println("+--------+--------------------+-------+");
-        System.out.printf("| %-7s| %-20s| %-6s|\n", "Código", "Nombre", "Unidades");
-        System.out.println("+--------+--------------------+-------+");
+        System.out.println("+--------+--------------------+---------+");
+        System.out.printf("| %-7s| %-20s| %-8s|\n", "Código", "Nombre", "Unidades");
+        System.out.println("+--------+--------------------+---------+");
     }
 
     public static void pieDeTabla() {
         System.out.println("+--------+--------------------+-------+");
+    }
+    public static void pieDeTablaVenta() {
+        System.out.println("+--------+--------------------+----------+");
     }
 }
